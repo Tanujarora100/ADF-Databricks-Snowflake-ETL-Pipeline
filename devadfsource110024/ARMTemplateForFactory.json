@@ -1,0 +1,1052 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "devadfsource110024"
+		},
+		"Sinkrawdatalakelinked_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'Sinkrawdatalakelinked'"
+		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://adf-keyvault-110024.vault.azure.net/"
+		},
+		"Sinkrawdatalakelinked_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://rawsink110024.dfs.core.windows.net/"
+		},
+		"SourceADF_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adfpracticestorage110024.dfs.core.windows.net/"
+		},
+		"SourceADF_properties_typeProperties_tenant": {
+			"type": "string",
+			"defaultValue": "bab5753f-ebba-44e0-ae76-02d702aa13b5"
+		},
+		"SourceADF_properties_typeProperties_servicePrincipalId": {
+			"type": "string",
+			"defaultValue": "aa453dd1-fefc-494f-b4ad-27f76673e713"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "copy_user_data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "FlattenHierarchy"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "user_dataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "user_parquet_sink",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "copy_seller_data",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "copy_country",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "PreserveHierarchy"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "buyer_source_dataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "seller_parquet",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Copy data3",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "copy_seller_data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "buyer_source_dataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Buyer_Parquet",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "copy_country",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "copy_user_data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "country_data",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "country_parquet_file",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-06-24T15:07:55Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/user_dataset')]",
+				"[concat(variables('factoryId'), '/datasets/user_parquet_sink')]",
+				"[concat(variables('factoryId'), '/datasets/buyer_source_dataset')]",
+				"[concat(variables('factoryId'), '/datasets/seller_parquet')]",
+				"[concat(variables('factoryId'), '/datasets/Buyer_Parquet')]",
+				"[concat(variables('factoryId'), '/datasets/country_data')]",
+				"[concat(variables('factoryId'), '/datasets/country_parquet_file')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Buyer_Parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Sinkrawdatalakelinked",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "buyer_raw",
+						"fileSystem": "raw-data"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Sinkrawdatalakelinked')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/buyer_source_dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SourceADF",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "buyer_raw_csv",
+						"fileSystem": "raw-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/SourceADF')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/country_data')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SourceADF",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "country_raw_csv",
+						"fileSystem": "raw-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "sellers",
+						"type": "String"
+					},
+					{
+						"name": "topsellers",
+						"type": "String"
+					},
+					{
+						"name": "topsellerratio",
+						"type": "String"
+					},
+					{
+						"name": "femalesellersratio",
+						"type": "String"
+					},
+					{
+						"name": "topfemalesellersratio",
+						"type": "String"
+					},
+					{
+						"name": "femalesellers",
+						"type": "String"
+					},
+					{
+						"name": "malesellers",
+						"type": "String"
+					},
+					{
+						"name": "topfemalesellers",
+						"type": "String"
+					},
+					{
+						"name": "topmalesellers",
+						"type": "String"
+					},
+					{
+						"name": "countrysoldratio",
+						"type": "String"
+					},
+					{
+						"name": "bestsoldratio",
+						"type": "String"
+					},
+					{
+						"name": "toptotalproductssold",
+						"type": "String"
+					},
+					{
+						"name": "totalproductssold",
+						"type": "String"
+					},
+					{
+						"name": "toptotalproductslisted",
+						"type": "String"
+					},
+					{
+						"name": "totalproductslisted",
+						"type": "String"
+					},
+					{
+						"name": "topmeanproductssold",
+						"type": "String"
+					},
+					{
+						"name": "topmeanproductslisted",
+						"type": "String"
+					},
+					{
+						"name": "meanproductssold",
+						"type": "String"
+					},
+					{
+						"name": "meanproductslisted",
+						"type": "String"
+					},
+					{
+						"name": "meanofflinedays",
+						"type": "String"
+					},
+					{
+						"name": "topmeanofflinedays",
+						"type": "String"
+					},
+					{
+						"name": "meanfollowers",
+						"type": "String"
+					},
+					{
+						"name": "meanfollowing",
+						"type": "String"
+					},
+					{
+						"name": "topmeanfollowers",
+						"type": "String"
+					},
+					{
+						"name": "topmeanfollowing",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/SourceADF')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/country_parquet_file')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Sinkrawdatalakelinked",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "country_raw",
+						"fileSystem": "raw-data"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Sinkrawdatalakelinked')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/seller_dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SourceADF",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "seller_raw_csv",
+						"fileSystem": "raw-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "sellers",
+						"type": "String"
+					},
+					{
+						"name": "topsellers",
+						"type": "String"
+					},
+					{
+						"name": "topsellerratio",
+						"type": "String"
+					},
+					{
+						"name": "femalesellersratio",
+						"type": "String"
+					},
+					{
+						"name": "topfemalesellersratio",
+						"type": "String"
+					},
+					{
+						"name": "femalesellers",
+						"type": "String"
+					},
+					{
+						"name": "malesellers",
+						"type": "String"
+					},
+					{
+						"name": "topfemalesellers",
+						"type": "String"
+					},
+					{
+						"name": "topmalesellers",
+						"type": "String"
+					},
+					{
+						"name": "countrysoldratio",
+						"type": "String"
+					},
+					{
+						"name": "bestsoldratio",
+						"type": "String"
+					},
+					{
+						"name": "toptotalproductssold",
+						"type": "String"
+					},
+					{
+						"name": "totalproductssold",
+						"type": "String"
+					},
+					{
+						"name": "toptotalproductslisted",
+						"type": "String"
+					},
+					{
+						"name": "totalproductslisted",
+						"type": "String"
+					},
+					{
+						"name": "topmeanproductssold",
+						"type": "String"
+					},
+					{
+						"name": "topmeanproductslisted",
+						"type": "String"
+					},
+					{
+						"name": "meanproductssold",
+						"type": "String"
+					},
+					{
+						"name": "meanproductslisted",
+						"type": "String"
+					},
+					{
+						"name": "meanofflinedays",
+						"type": "String"
+					},
+					{
+						"name": "topmeanofflinedays",
+						"type": "String"
+					},
+					{
+						"name": "meanfollowers",
+						"type": "String"
+					},
+					{
+						"name": "meanfollowing",
+						"type": "String"
+					},
+					{
+						"name": "topmeanfollowers",
+						"type": "String"
+					},
+					{
+						"name": "topmeanfollowing",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/SourceADF')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/seller_parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Sinkrawdatalakelinked",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "seller_raw",
+						"fileSystem": "raw-data"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Sinkrawdatalakelinked')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/user_dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SourceADF",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "user_raw_csv",
+						"fileSystem": "raw-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "identifierHash",
+						"type": "String"
+					},
+					{
+						"name": "type",
+						"type": "String"
+					},
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "language",
+						"type": "String"
+					},
+					{
+						"name": "socialNbFollowers",
+						"type": "String"
+					},
+					{
+						"name": "socialNbFollows",
+						"type": "String"
+					},
+					{
+						"name": "socialProductsLiked",
+						"type": "String"
+					},
+					{
+						"name": "productsListed",
+						"type": "String"
+					},
+					{
+						"name": "productsSold",
+						"type": "String"
+					},
+					{
+						"name": "productsPassRate",
+						"type": "String"
+					},
+					{
+						"name": "productsWished",
+						"type": "String"
+					},
+					{
+						"name": "productsBought",
+						"type": "String"
+					},
+					{
+						"name": "gender",
+						"type": "String"
+					},
+					{
+						"name": "civilityGenderId",
+						"type": "String"
+					},
+					{
+						"name": "civilityTitle",
+						"type": "String"
+					},
+					{
+						"name": "hasAnyApp",
+						"type": "String"
+					},
+					{
+						"name": "hasAndroidApp",
+						"type": "String"
+					},
+					{
+						"name": "hasIosApp",
+						"type": "String"
+					},
+					{
+						"name": "hasProfilePicture",
+						"type": "String"
+					},
+					{
+						"name": "daysSinceLastLogin",
+						"type": "String"
+					},
+					{
+						"name": "seniority",
+						"type": "String"
+					},
+					{
+						"name": "seniorityAsMonths",
+						"type": "String"
+					},
+					{
+						"name": "seniorityAsYears",
+						"type": "String"
+					},
+					{
+						"name": "countryCode",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/SourceADF')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/user_parquet_sink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Sinkrawdatalakelinked",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "user_raw",
+						"fileSystem": "raw-data"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "identifierHash",
+						"type": "UTF8"
+					},
+					{
+						"name": "type",
+						"type": "UTF8"
+					},
+					{
+						"name": "country",
+						"type": "UTF8"
+					},
+					{
+						"name": "language",
+						"type": "UTF8"
+					},
+					{
+						"name": "socialNbFollowers",
+						"type": "UTF8"
+					},
+					{
+						"name": "socialNbFollows",
+						"type": "UTF8"
+					},
+					{
+						"name": "socialProductsLiked",
+						"type": "UTF8"
+					},
+					{
+						"name": "productsListed",
+						"type": "UTF8"
+					},
+					{
+						"name": "productsSold",
+						"type": "UTF8"
+					},
+					{
+						"name": "productsPassRate",
+						"type": "UTF8"
+					},
+					{
+						"name": "productsWished",
+						"type": "UTF8"
+					},
+					{
+						"name": "productsBought",
+						"type": "UTF8"
+					},
+					{
+						"name": "gender",
+						"type": "UTF8"
+					},
+					{
+						"name": "civilityGenderId",
+						"type": "UTF8"
+					},
+					{
+						"name": "civilityTitle",
+						"type": "UTF8"
+					},
+					{
+						"name": "hasAnyApp",
+						"type": "UTF8"
+					},
+					{
+						"name": "hasAndroidApp",
+						"type": "UTF8"
+					},
+					{
+						"name": "hasIosApp",
+						"type": "UTF8"
+					},
+					{
+						"name": "hasProfilePicture",
+						"type": "UTF8"
+					},
+					{
+						"name": "daysSinceLastLogin",
+						"type": "UTF8"
+					},
+					{
+						"name": "seniority",
+						"type": "UTF8"
+					},
+					{
+						"name": "seniorityAsMonths",
+						"type": "UTF8"
+					},
+					{
+						"name": "seniorityAsYears",
+						"type": "UTF8"
+					},
+					{
+						"name": "countryCode",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Sinkrawdatalakelinked')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureKeyVault1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Sinkrawdatalakelinked')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('Sinkrawdatalakelinked_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('Sinkrawdatalakelinked_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "adfruntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/adfruntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceADF')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('SourceADF_properties_typeProperties_url')]",
+					"tenant": "[parameters('SourceADF_properties_typeProperties_tenant')]",
+					"servicePrincipalId": "[parameters('SourceADF_properties_typeProperties_servicePrincipalId')]",
+					"servicePrincipalCredentialType": "ServicePrincipalKey",
+					"servicePrincipalCredential": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault1",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "client-id"
+					}
+				},
+				"connectVia": {
+					"referenceName": "adfruntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/adfruntime')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adfruntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 10,
+							"cleanup": false,
+							"customProperties": []
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntime1')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 10,
+							"cleanup": false,
+							"customProperties": []
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

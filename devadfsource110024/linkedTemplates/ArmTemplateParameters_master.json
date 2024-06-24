@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "devadfsource110024"
+		},
+		"Sinkrawdatalakelinked_accountKey": {
+			"value": ""
+		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"value": "https://adf-keyvault-110024.vault.azure.net/"
+		},
+		"Sinkrawdatalakelinked_properties_typeProperties_url": {
+			"value": "https://rawsink110024.dfs.core.windows.net/"
+		},
+		"SourceADF_properties_typeProperties_url": {
+			"value": "https://adfpracticestorage110024.dfs.core.windows.net/"
+		},
+		"SourceADF_properties_typeProperties_tenant": {
+			"value": "bab5753f-ebba-44e0-ae76-02d702aa13b5"
+		},
+		"SourceADF_properties_typeProperties_servicePrincipalId": {
+			"value": "aa453dd1-fefc-494f-b4ad-27f76673e713"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
