@@ -1,0 +1,21 @@
+{
+	"name": "Buyer_Parquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Sinkrawdatalakelinked",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "buyer_raw",
+				"fileSystem": "raw-data"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

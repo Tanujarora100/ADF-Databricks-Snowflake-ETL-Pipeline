@@ -1,0 +1,129 @@
+{
+	"name": "seller_dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SourceADF",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "seller_raw_csv",
+				"fileSystem": "raw-data"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "country",
+				"type": "String"
+			},
+			{
+				"name": "sellers",
+				"type": "String"
+			},
+			{
+				"name": "topsellers",
+				"type": "String"
+			},
+			{
+				"name": "topsellerratio",
+				"type": "String"
+			},
+			{
+				"name": "femalesellersratio",
+				"type": "String"
+			},
+			{
+				"name": "topfemalesellersratio",
+				"type": "String"
+			},
+			{
+				"name": "femalesellers",
+				"type": "String"
+			},
+			{
+				"name": "malesellers",
+				"type": "String"
+			},
+			{
+				"name": "topfemalesellers",
+				"type": "String"
+			},
+			{
+				"name": "topmalesellers",
+				"type": "String"
+			},
+			{
+				"name": "countrysoldratio",
+				"type": "String"
+			},
+			{
+				"name": "bestsoldratio",
+				"type": "String"
+			},
+			{
+				"name": "toptotalproductssold",
+				"type": "String"
+			},
+			{
+				"name": "totalproductssold",
+				"type": "String"
+			},
+			{
+				"name": "toptotalproductslisted",
+				"type": "String"
+			},
+			{
+				"name": "totalproductslisted",
+				"type": "String"
+			},
+			{
+				"name": "topmeanproductssold",
+				"type": "String"
+			},
+			{
+				"name": "topmeanproductslisted",
+				"type": "String"
+			},
+			{
+				"name": "meanproductssold",
+				"type": "String"
+			},
+			{
+				"name": "meanproductslisted",
+				"type": "String"
+			},
+			{
+				"name": "meanofflinedays",
+				"type": "String"
+			},
+			{
+				"name": "topmeanofflinedays",
+				"type": "String"
+			},
+			{
+				"name": "meanfollowers",
+				"type": "String"
+			},
+			{
+				"name": "meanfollowing",
+				"type": "String"
+			},
+			{
+				"name": "topmeanfollowers",
+				"type": "String"
+			},
+			{
+				"name": "topmeanfollowing",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

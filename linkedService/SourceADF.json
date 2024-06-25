@@ -1,0 +1,26 @@
+{
+	"name": "SourceADF",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://adfpracticestorage110024.dfs.core.windows.net/",
+			"tenant": "bab5753f-ebba-44e0-ae76-02d702aa13b5",
+			"servicePrincipalId": "aa453dd1-fefc-494f-b4ad-27f76673e713",
+			"servicePrincipalCredentialType": "ServicePrincipalKey",
+			"servicePrincipalCredential": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault1",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "client-id"
+			}
+		},
+		"connectVia": {
+			"referenceName": "adfruntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

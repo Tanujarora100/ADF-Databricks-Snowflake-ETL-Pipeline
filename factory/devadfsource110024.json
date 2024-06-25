@@ -1,0 +1,14 @@
+{
+	"name": "devadfsource110024",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "e030abb3-4214-43b9-9525-dec20cce07cf",
+		"tenantId": "bab5753f-ebba-44e0-ae76-02d702aa13b5"
+	}
+}
